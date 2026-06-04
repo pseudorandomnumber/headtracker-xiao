@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeadTracker Config</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>🎯 HeadTracker</h1>
+    <div id="statusBar">
+      <span id="wsStatus" class="badge disconnected">Disconnected</span>
+      <span id="fwVersion" class="badge info">v?</span>
+    </div>
+  </header>
+
+  <!-- Tab navigation -->
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="live">Live</button>
+    <button class="tab-btn" data-tab="channels">Channels</button>
+    <button class="tab-btn" data-tab="output">Output</button>
+    <button class="tab-btn" data-tab="calibration">Calibration</button>
+    <button class="tab-btn" data-tab="system">System</button>
+  </nav>
+
+  <!-- ═══ TAB: LIVE ══════════════════════════════════════════════════════════ -->
+  <section id="tab-live" class="tab-content active">
+    <div class="live-grid">
+      <div class="live-card">
+        <div class="axis-label">PAN</div>
+        <div class="axis-value" id="lv-pan">0.0°</div>
+        <div class="axis-us" id="lv-panUs">1500 µs</div>
+        <div class="bar-wrap"><div class="bar-fill" id="bar-pan"></div></div>
+      </div>
+      <div class="live-card">
+        <div class="axis-label">TILT</div>
+        <div class="axis-value" id="lv-tilt">0.0°</div>
+        <div class="axis-us" id="lv-tiltUs">1500 µs</div>
+        <div class="bar-wrap"><div class="bar-fill" id="bar-tilt"></div></div>
+      </div>
+      <div class="live-card">
+        <div class="axis-label">ROLL</div>
+        <div class="axis-value" id="lv-roll">0.0°</div>
+        <div class="axis-us" id="lv-rollUs">1500 µs</div>
+        <div class="bar-wrap"><div class="bar-fill" id="bar-roll"></div></div>
+      </div>
+    </div>
+
+    <div class="cal-status">
+      <span class="cal-label">BNO055 Cal:</span>
+      <span class="cal-dot" id="cal-sys">Sys 0</span>
+      <span class="cal-dot" id="cal-gyr">Gyro 0</span>
+      <span class="cal-dot" id="cal-acc">Acc 0</span>
+      <span class="cal-dot" id="cal-mag">Mag 0</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="btnSetCenter">Set Center</button>
+      <button class="btn-secondary" id="btnStream">▶ Start Stream</button>
+    </div>
+  </section>
+
+  <!-- ═══ TAB: CHANNELS ═════════════════════════════════════════════════════ -->
+  <section id="tab-channels" class="tab-content">
+    <p class="hint">Changes apply immediately. Use <b>Save to Flash</b> in System tab to persist.</p>
+
+    <!-- Pan -->
+    <fieldset>
+      <legend>Pan (Yaw)</legend>
+      <div class="field-row">
+        <label>RC Channel</label>
+        <input type="number" id="PanCh" min="1" max="8" step="1">
+      </div>
+      <div class="field-row">
+        <label>Min (µs)</label>
+        <input type="number" id="PanMin" min="500" max="2500" step="10">
+      </div>
+      <div class="field-row">
+        <label>Center (µs)</label>
+        <input type="number" id="PanCnt" min="500" max="2500" step="10">
+      </div>
+      <div class="field-row">
+        <label>Max (µs)</label>
+        <input type="number" id="PanMax" min="500" max="2500" step="10">
+      </div>
+      <div class="field-row">
+        <label>Gain</label>
+        <input type="number" id="PanGain" min="-10" max="10" step="0.1">
+      </div>
+      <div class="field-row">
+        <label>Reverse</label>
+        <input type="checkbox" id="PanRev">
+      </div>
+    </fieldset>
+
+    <!-- Tilt -->
+    <fieldset>
+      <legend>Tilt (Pitch)</legend>
+      <div class="field-row">
+        <label>RC Channel</label>
+        <input type="number" id="TltCh" min="1" max="8" step="1">
+      </div>
+      <div class="field-row">
+        <label>Min (µs)</label>
+        <input type="number" id="TltMin" min="500" max="2500" step="10">
+      </div>
+      <div class="field-row">
+        <label>Center (µs)</label>
+        <input type="number" id="TltCnt" min="500" max="2500" step="10">
+      </div>
+      <div class="field-row">
+        <label>Max (µs)</label>
+        <input type="number" id="TltMax" min="500" max="2500" step="10">
+      </div>
+      <div class="field-row">
+        <label>Gain</label>
+        <input type="number" id="TltGain" min="-10" max="10" step="0.1">
+      </div>
+      <div class="field-row">
+        <label>Reverse</label>
+        <input type="checkbox" id="TltRev">
+      </div>
+    </fieldset>
+
+    <!-- Roll -->
+    <fieldset>
+      <legend>Roll</legend>
+      <div class="field-row">
+        <label>RC Channel</label>
+        <input type="number" id="RllCh" min="1" max="8" step="1">
+      </div>
+      <div class="field-row">
+        <label>Min (µs)</label>
+        <input type="number" id="RllMin" min="500" max="2500" step="10">
+      </div>
+      <div class="field-row">
+        <label>Center (µs)</label>
+        <input type="number" id="RllCnt" min="500" max="2500" step="10">
+      </div>
+      <div class="field-row">
+        <label>Max (µs)</label>
+        <input type="number" id="RllMax" min="500" max="2500" step="10">
+      </div>
+      <div class="field-row">
+        <label>Gain</label>
+        <input type="number" id="RllGain" min="-10" max="10" step="0.1">
+      </div>
+      <div class="field-row">
+        <label>Reverse</label>
+        <input type="checkbox" id="RllRev">
+      </div>
+    </fieldset>
+  </section>
+
+  <!-- ═══ TAB: OUTPUT ════════════════════════════════════════════════════════ -->
+  <section id="tab-output" class="tab-content">
+    <fieldset>
+      <legend>Output Mode</legend>
+      <div class="field-row">
+        <label>PPM Out (3.5mm)</label>
+        <input type="checkbox" id="chk-ppm">
+      </div>
+      <div class="field-row">
+        <label>BLE HID Joystick</label>
+        <input type="checkbox" id="chk-ble">
+      </div>
+    </fieldset>
+    <div class="info-box">
+      <b>PPM:</b> Connect GPIO2 tip of 3.5mm jack to trainer port.<br>
+      <b>BLE:</b> Device appears as "HeadTracker" in EdgeTX BT scan.
+    </div>
+  </section>
+
+  <!-- ═══ TAB: CALIBRATION ══════════════════════════════════════════════════ -->
+  <section id="tab-calibration" class="tab-content">
+    <div class="cal-big">
+      <div class="cal-big-row">
+        <span>System</span><span id="b-cal-sys" class="cal-val">0/3</span>
+      </div>
+      <div class="cal-big-row">
+        <span>Gyroscope</span><span id="b-cal-gyr" class="cal-val">0/3</span>
+      </div>
+      <div class="cal-big-row">
+        <span>Accelerometer</span><span id="b-cal-acc" class="cal-val">0/3</span>
+      </div>
+      <div class="cal-big-row">
+        <span>Magnetometer</span><span id="b-cal-mag" class="cal-val">0/3</span>
+      </div>
+    </div>
+
+    <div class="hint">
+      <b>To calibrate:</b><br>
+      • <b>Gyro:</b> Leave still for a few seconds.<br>
+      • <b>Accel:</b> Place flat on each of 6 faces briefly.<br>
+      • <b>Mag:</b> Slowly rotate in a figure-8 pattern.<br>
+      • <b>Sys=3</b> means full fusion is calibrated ✓
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="btnSetCenter2">Set Center</button>
+    </div>
+  </section>
+
+  <!-- ═══ TAB: SYSTEM ════════════════════════════════════════════════════════ -->
+  <section id="tab-system" class="tab-content">
+    <div class="info-box" id="sysInfo">
+      Firmware: —<br>Hardware: —<br>WiFi AP: —
+    </div>
+    <div class="btn-row col">
+      <button class="btn-primary" id="btnSaveFlash">💾 Save to Flash</button>
+      <button class="btn-secondary" id="btnGetSettings">🔄 Reload Settings</button>
+      <button class="btn-danger" id="btnReboot">⚡ Reboot</button>
+    </div>
+  </section>
+
+  <!-- Toast notification -->
+  <div id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

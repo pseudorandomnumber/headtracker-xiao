@@ -1,0 +1,295 @@
+/* HeadTracker Web UI - style.css */
+:root {
+  --bg:       #0f1117;
+  --surface:  #1a1d26;
+  --border:   #2e3244;
+  --accent:   #4f9cf9;
+  --green:    #4caf50;
+  --orange:   #ff9800;
+  --red:      #f44336;
+  --text:     #e8eaf6;
+  --subtext:  #9e9faa;
+  --radius:   8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+header h1 { font-size: 18px; font-weight: 600; }
+
+#statusBar { display: flex; gap: 8px; align-items: center; }
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge.disconnected { background: #3a1a1a; color: var(--red); border: 1px solid var(--red); }
+.badge.connected    { background: #1a3a1a; color: var(--green); border: 1px solid var(--green); }
+.badge.info         { background: #1a2a3a; color: var(--accent); border: 1px solid var(--accent); }
+
+/* ─── Tabs ────────────────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+  flex: 1;
+  min-width: 60px;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: var(--subtext);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.tab-btn:hover   { color: var(--text); }
+.tab-btn.active  { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ─── Tab content ─────────────────────────────────────────────────────────── */
+.tab-content { display: none; padding: 16px; max-width: 600px; margin: 0 auto; }
+.tab-content.active { display: block; }
+
+/* ─── Live tab ────────────────────────────────────────────────────────────── */
+.live-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.live-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.axis-label { font-size: 10px; font-weight: 700; color: var(--subtext); letter-spacing: 1px; margin-bottom: 4px; }
+.axis-value { font-size: 20px; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+.axis-us    { font-size: 11px; color: var(--subtext); margin-bottom: 8px; }
+
+.bar-wrap {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  width: 50%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.1s;
+}
+
+/* Calibration dots */
+.cal-status {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.cal-label  { font-size: 12px; color: var(--subtext); }
+.cal-dot {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #2a2a3a;
+  color: var(--red);
+  transition: all 0.3s;
+}
+.cal-dot.ok  { color: var(--green); background: #1a3a1a; }
+.cal-dot.mid { color: var(--orange); background: #3a2a1a; }
+
+/* ─── Channels tab ────────────────────────────────────────────────────────── */
+fieldset {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+legend {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--accent);
+  padding: 0 6px;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.field-row:last-child { border-bottom: none; }
+.field-row label { color: var(--subtext); font-size: 13px; }
+
+input[type="number"],
+input[type="text"] {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 4px 8px;
+  width: 90px;
+  font-size: 13px;
+  text-align: right;
+}
+input[type="number"]:focus,
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* ─── Calibration big tab ─────────────────────────────────────────────────── */
+.cal-big {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.cal-big-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.cal-big-row:last-child { border-bottom: none; }
+.cal-val {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--red);
+  transition: color 0.3s;
+}
+.cal-val.ok  { color: var(--green); }
+.cal-val.mid { color: var(--orange); }
+
+/* ─── Info / hint boxes ───────────────────────────────────────────────────── */
+.info-box {
+  background: #1a2a3a;
+  border: 1px solid #2a3a4a;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  color: #aac4e0;
+}
+
+.hint {
+  background: #1a1e2a;
+  border-left: 3px solid var(--accent);
+  padding: 10px 14px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 16px;
+  color: var(--subtext);
+}
+.hint b { color: var(--text); }
+
+/* ─── Buttons ─────────────────────────────────────────────────────────────── */
+.btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btn-row.col { flex-direction: column; }
+
+.btn-primary, .btn-secondary, .btn-danger {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  flex: 1;
+}
+.btn-primary:active, .btn-secondary:active, .btn-danger:active { transform: scale(0.97); }
+
+.btn-primary   { background: var(--accent); color: #fff; }
+.btn-primary:hover   { opacity: 0.88; }
+.btn-secondary { background: var(--border); color: var(--text); }
+.btn-secondary:hover { opacity: 0.80; }
+.btn-danger    { background: var(--red);    color: #fff; }
+.btn-danger:hover    { opacity: 0.85; }
+
+/* ─── System tab ──────────────────────────────────────────────────────────── */
+#sysInfo { font-family: monospace; font-size: 13px; line-height: 1.8; }
+
+/* ─── Toast ───────────────────────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #2a3a4a;
+  color: var(--text);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: transform 0.25s ease;
+  pointer-events: none;
+  z-index: 100;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 400px) {
+  .live-grid { grid-template-columns: 1fr; }
+  .axis-value { font-size: 16px; }
+}
