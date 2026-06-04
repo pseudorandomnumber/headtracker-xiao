@@ -2,22 +2,21 @@
  * HeadTracker for Seeed XIAO ESP32C6
  * btjoystick.h — BLE HID Joystick (8 channels, 16-bit axes)
  *
- * Uses the built-in ESP32 BLE Arduino library (arduino-esp32 3.x).
- * No extra library dependency.
+ * Uses NimBLE-Arduino 2.x (h2zero/NimBLE-Arduino @ ^2.1.0).
+ * NimBLE is the only BLE stack supported on ESP32C6 — Bluedroid is not available.
  *
- * Appears as "HeadTracker" to EdgeTX BT Joystick trainer input.
+ * Appears as "HeadTracker" BLE HID gamepad to EdgeTX BT Joystick trainer input.
  */
 
 #pragma once
 #include <Arduino.h>
 
-// Initialise BLE HID Joystick (call once)
+// Initialise BLE HID Joystick (call once from setup, after WiFi)
 void btJoystick_init();
 
 // Send current channel values over BLE HID.
-// channels[]: 1-indexed array of µs values (1000–2000), index 0 unused.
-// Maps µs → signed 16-bit: 1000→-32768  1500→0  2000→32767
+// Reads trkset.chanOut[1..8] (µs), maps 1000→-32768 / 1500→0 / 2000→+32767
 void btJoystick_update();
 
-// True if a BLE central is connected
+// True if a BLE central is currently connected
 bool btJoystick_connected();

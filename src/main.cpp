@@ -166,13 +166,13 @@ void setup() {
         ppmOut_enable(true);
     }
 
-    // ── BLE HID joystick ─────────────────────────────────────────────────────
+    // ── WiFi AP + WebSocket (before BLE — WiFi must claim the radio first) ───
+    webserver_init();
+
+    // ── BLE HID joystick (after WiFi — coexistence mode already active) ──────
     if (trkset.bleEnabled()) {
         btJoystick_init();
     }
-
-    // ── WiFi AP + WebSocket ───────────────────────────────────────────────────
-    webserver_init();
 
     // ── Serial protocol ───────────────────────────────────────────────────────
     serial_init();

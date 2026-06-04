@@ -1,6 +1,9 @@
 /*
  * HeadTracker for Seeed XIAO ESP32C6
- * btjoystick.cpp — BLE HID Joystick using built-in ESP32 BLE Arduino library
+ * btjoystick.cpp — BLE HID Joystick using NimBLE-Arduino 2.x
+ *
+ * NimBLE is the only BLE stack on ESP32C6 (Bluedroid is not supported).
+ * Uses h2zero/NimBLE-Arduino @ ^2.1.0.
  *
  * 8-channel 16-bit joystick (channels mapped from PPM µs values).
  * Appears as "HeadTracker" in EdgeTX Bluetooth Joystick trainer list.
@@ -13,11 +16,11 @@
 #include "btjoystick.h"
 #include "trackersettings.h"
 
-#include <BLEDevice.h>
-#include <BLEServer.h>
-#include <BLEUtils.h>
-#include <BLE2902.h>
-#include <BLEHIDDevice.h>
+#include <NimBLEDevice.h>
+#include <NimBLEServer.h>
+#include <NimBLEHIDDevice.h>
+#include <NimBLECharacteristic.h>
+#include <NimBLEAdvertising.h>
 #include <HIDTypes.h>
 
 // ─── HID Report Descriptor — 8 axes, 16-bit each ─────────────────────────────
@@ -28,7 +31,7 @@ static const uint8_t kJoystickHIDReportDesc[] = {
 
   0x85, 0x01,        //   Report ID (1)
 
-  // 8 × 16-bit signed axes  (CH1-CH8)
+  // 8 × 16-bit signed axes (CH1-CH8)
   0x09, 0x01,        //   Usage (Pointer)
   0xA1, 0x00,        //   Collection (Physical)
   0x09, 0x30,        //     Usage (X)
@@ -49,55 +52,56 @@ static const uint8_t kJoystickHIDReportDesc[] = {
   0xC0               // End Collection (Application)
 };
 
-// ─── BLE objects ──────────────────────────────────────────────────────────────
-static BLEHIDDevice*       hidDevice    = nullptr;
-static BLECharacteristic*  inputReport  = nullptr;
-static BLEServer*          bleServer    = nullptr;
-static bool                bleConnected = false;
+// ─── NimBLE objects ───────────────────────────────────────────────────────────
+static NimBLEHIDDevice*       hidDevice   = nullptr;
+static NimBLECharacteristic*  inputReport = nullptr;
+static bool                   bleConnected = false;
 
-// ─── Connection callbacks ─────────────────────────────────────────────────────
-class BtCallbacks : public BLEServerCallbacks {
-    void onConnect(BLEServer* svr) override {
+// ─── Server callbacks (NimBLE 2.x signature) ─────────────────────────────────
+class BtCallbacks : public NimBLEServerCallbacks {
+    void onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) override {
         bleConnected = true;
-        Serial.println("[BLE] Client connected");
+        Serial.printf("[BLE] Client connected: %s\n",
+                      connInfo.getAddress().toString().c_str());
     }
-    void onDisconnect(BLEServer* svr) override {
+    void onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) override {
         bleConnected = false;
-        Serial.println("[BLE] Client disconnected — advertising again");
-        BLEDevice::startAdvertising();
+        Serial.printf("[BLE] Client disconnected (reason %d) — re-advertising\n", reason);
+        NimBLEDevice::startAdvertising();
     }
 };
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 void btJoystick_init() {
-    BLEDevice::init("HeadTracker");
+    NimBLEDevice::init("HeadTracker");
+    NimBLEDevice::setPower(3); // +3 dBm
 
-    bleServer = BLEDevice::createServer();
-    bleServer->setCallbacks(new BtCallbacks());
+    NimBLEServer* server = NimBLEDevice::createServer();
+    server->setCallbacks(new BtCallbacks());
 
-    hidDevice = new BLEHIDDevice(bleServer);
-    hidDevice->manufacturer()->setValue("HeadTracker");
-    hidDevice->pnp(0x02, 0x045E, 0x0719, 0x0100);  // sig, vid, pid, version
-    hidDevice->hidInfo(0x00, 0x01);                  // country, flags
+    hidDevice = new NimBLEHIDDevice(server);
+
+    // Device Information (NimBLE 2.x API: set* prefix)
+    hidDevice->setManufacturer("HeadTracker");
+    hidDevice->setPnp(0x02, 0x045E, 0x0719, 0x0100); // sig, vid, pid, version
+    hidDevice->setHidInfo(0x00, 0x01);                 // country, flags
 
     // Register HID report descriptor
-    hidDevice->reportMap((uint8_t*)kJoystickHIDReportDesc,
-                         sizeof(kJoystickHIDReportDesc));
+    hidDevice->setReportMap((uint8_t*)kJoystickHIDReportDesc,
+                            sizeof(kJoystickHIDReportDesc));
 
     // Create input report characteristic (Report ID 1)
-    inputReport = hidDevice->inputReport(1);
+    // NimBLE 2.x automatically handles CCCD — no BLE2902 needed
+    inputReport = hidDevice->getInputReport(1);
 
-    // Enable notifications
-    BLE2902* desc = new BLE2902();
-    desc->setNotifications(true);
-    inputReport->addDescriptor(desc);
-
-    hidDevice->startServices();
+    // Start the server (replaces deprecated hidDevice->startServices())
+    server->start();
 
     // Advertising
-    BLEAdvertising* adv = BLEDevice::getAdvertising();
+    NimBLEAdvertising* adv = NimBLEDevice::getAdvertising();
     adv->setAppearance(HID_GAMEPAD);
-    adv->addServiceUUID(hidDevice->hidService()->getUUID());
+    adv->addServiceUUID(hidDevice->getHidService()->getUUID());
+    adv->enableScanResponse(true);
     adv->start();
 
     Serial.println("[BLE] HID Joystick advertising as 'HeadTracker'");
@@ -109,10 +113,10 @@ void btJoystick_update() {
     // Build 8-channel report (16 bytes)
     int16_t axes[8];
     for (int i = 0; i < 8; i++) {
-        uint16_t us = trkset.chanOut[i + 1];   // 1-indexed, clamp to 1000-2000
+        uint16_t us = trkset.chanOut[i + 1];  // 1-indexed
         if (us < 1000) us = 1000;
         if (us > 2000) us = 2000;
-        // Map 1000-2000 → -32768..+32767
+        // Map 1000-2000 µs → -32768..+32767
         axes[i] = (int16_t)(((int32_t)(us - 1500)) * 32767 / 500);
     }
 
