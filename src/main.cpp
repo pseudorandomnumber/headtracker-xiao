@@ -144,7 +144,7 @@ void webTask(void*) {
 void setup() {
     // USB CDC Serial
     Serial.begin(115200);
-    delay(500); // Let CDC connect
+    delay(3000); // Wait for HWCDCSerial to enumerate on host (USB re-connects after reset)
     Serial.println("\n\n== HeadTracker v" FW_VERSION " ==");
     Serial.println("Board: " HW_VERSION);
 

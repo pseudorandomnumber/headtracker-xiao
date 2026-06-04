@@ -40,7 +40,9 @@ TrackerSettings::TrackerSettings() {
     _panCh   = DEF_PAN_CHANNEL;
     _panRev  = false;
 
-    _outputMode = OUTPUT_PPM | OUTPUT_BLE_HID;
+    // BLE disabled by default — enable via web UI once WiFi is confirmed working.
+    // NimBLE on ESP32C6 needs coexistence tuning; safe default is PPM-only.
+    _outputMode = OUTPUT_PPM;
 
     strlcpy(_apSSID, "HeadTracker", sizeof(_apSSID));
 
@@ -113,7 +115,7 @@ void TrackerSettings::loadFromFlash() {
     _panCh   = prefs.getInt("PanCh",   DEF_PAN_CHANNEL);
     _panRev  = prefs.getBool("PanRev", false);
 
-    _outputMode = prefs.getInt("OutMode", OUTPUT_PPM | OUTPUT_BLE_HID);
+    _outputMode = prefs.getInt("OutMode", OUTPUT_PPM);  // BLE off by default
 
     String ssid = prefs.getString("APSSID", "HeadTracker");
     strlcpy(_apSSID, ssid.c_str(), sizeof(_apSSID));
